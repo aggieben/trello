@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/aggieben/trello.png?label=ready&title=Ready)](https://waffle.io/aggieben/trello)
 gotrello
 ========
 
