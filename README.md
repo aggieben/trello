@@ -1,6 +1,6 @@
 gotrello
 ========
 
-[![Build Status](https://travis-ci.org/aggieben/gotrello.png?branch=master)](https://travis-ci.org/aggieben/gotrello)
+[![Build Status](https://drone.io/github.com/aggieben/gotrello/status.png)](https://drone.io/github.com/aggieben/gotrello/latest)
 
 Go SDK for Trello
