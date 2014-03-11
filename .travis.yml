@@ -7,7 +7,9 @@ install:
   - go get code.google.com/p/go.tools/cmd/cover
   - go get github.com/mattn/goveralls
   - go get github.com/stretchr/testify
-  - go install github.com/mattn/goveralls
+  - echo "GOPATH: $GOPATH"
+  - echo "PATH: $PATH"
+  - for path in ${GOPATH//:/ }; do ls -l "$path/bin"; done
 
 script:
   - go test -covermode=count -coverprofile=profile.cov
