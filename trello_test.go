@@ -1,10 +1,17 @@
 package trello
 
-import "testing"
+import (
+	//	"github.com/dchest/uniuri"
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
 func TestNewTrelloHasContext(t *testing.T) {
-	trello := NewTrello("blah", "dee", "dah")
-	if trello.context == nil {
-		t.Error("Expected allocated and initialized context, got ", trello.context, " instead.")
-	}
+	trello := NewTrello(TrelloParams{})
+	assert.NotNil(t, trello.context)
+}
+
+func TestNewTrelloHasClient(t *testing.T) {
+	trello := NewTrello(TrelloParams{})
+	assert.NotNil(t, trello.context.client)
 }

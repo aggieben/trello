@@ -1,8 +1,10 @@
 package trello
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 )
 
 type Member struct {
@@ -13,30 +15,42 @@ type Member struct {
 
 var minimalFields = [...]ModelField{FullName, Username}
 
-func (m *Member) MinimalFields() []ModelField {
+func (m Member) MinimalFields() []ModelField {
 	return minimalFields[:]
 }
 
 // Get Member model of authenticated user
-func (m *Member) Me(context *context, params *ModelParams) (ResponseChannel, error) {
-	if context.Token == "" {
-		return nil, errors.New("Cannot request members/me without user token.")
+func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloResponse {
+	trc := make(chan *TrelloResponse)
+
+	if context.token == "" {
+		trc <- &TrelloResponse{error: errors.New("Cannot request members/me without user token.")}
 	}
 
-	rc := make(ResponseChannel)
-	req := MakeRequest(context, "members/me", "")
+	req := MakeGetRequest(context, "members/me", fmt.Sprintf("fields=%v", params.FieldsQueryParameter()))
 
-	go SendRequest(context.client, req, rc)
+	go func() {
+		resp, err := context.client.Do(req)
+		if err != nil {
+			trc <- &TrelloResponse{error: err}
+			return
+		}
+		defer resp.Body.Close()
 
-	return rc, nil
-}
+		log.Printf("got response: %v", resp)
 
-// Get Member by username
-func (m *Member) Get(context *context, params *ModelParams, username string) (ResponseChannel, *error) {
-	rc := make(ResponseChannel)
-	req := MakeRequest(context, fmt.Sprintf("members/%s", username), "")
+		var m Member
+		decoder := json.NewDecoder(resp.Body)
+		log.Println("decoder: %v", decoder)
+		err = decoder.Decode(&m)
+		if err != nil {
+			log.Printf("error decoding json: %v", err)
+			trc <- &TrelloResponse{error: err}
+			return
+		}
+		log.Println("model: %v", m)
+		trc <- &TrelloResponse{model: m}
+	}()
 
-	go SendRequest(context.client, req, rc)
-
-	return rc, nil
+	return trc
 }

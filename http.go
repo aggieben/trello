@@ -1,31 +1,31 @@
 package trello
 
 import "net/http"
-import "net/url"
+
 import "runtime"
 import "fmt"
+import "log"
 
-func MakeRequest(context *context, path string, query string) *http.Request {
-	req := &http.Request{}
-	req.Header.Add("User-Agent", fmt.Sprintf("go %s / github.com/aggieben/trello %s", runtime.Version(), Version()))
+const apiHost = "api.trello.com"
 
-	var err error
-	if req.URL, err = url.Parse(fmt.Sprintf("https://api.trello.com/1/%s?%s", path, query)); err != nil {
-		return nil
+func MakeGetRequest(context *context, path string, query string) *http.Request {
+	baseUrl := fmt.Sprintf("https://%s/1", apiHost)
+	if context.baseUrl != "" {
+		baseUrl = context.baseUrl
 	}
+
+	var req *http.Request = nil
+	var err error
+	if req, err = http.NewRequest("GET", fmt.Sprintf("%s/1/%s?%s", baseUrl, path, query), nil); err != nil {
+		log.Fatalln("Unable to create HTTP request: %v", err)
+	}
+
+	req.Header.Add("User-Agent", fmt.Sprintf("go %s / github.com/aggieben/trello %s", runtime.Version(), Version()))
 
 	return req
 }
 
-type ResponseChannel chan interface{}
-
-func SendRequest(client *http.Client, req *http.Request, rx ResponseChannel) {
-	var msg interface{}
-	if resp, err := client.Do(req); err == nil {
-		msg = resp
-	} else {
-		msg = &err
-	}
-
-	rx <- msg
+type TrelloResponse struct {
+	model Model
+	error interface{}
 }
