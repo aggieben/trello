@@ -3,10 +3,8 @@ go:
   - "tip"
   - "1.2"
 
-before_script:
-  - go get code.google.com/p/go.tools/cmd/cover
-  - go get github.com/mattn/goveralls
-
 script:
-  - go test -covermode=count -coverprofile=cov.out
-  - goveralls -coverprofile=cov.out -service=travis-ci
+  - go get code.google.com/p/go.tools/cmd/cover
+  - go ge github.com/hailiang/goveralls
+  - go test -covermode=count -coverprofile=profile.cov
+  - goveralls -coverprofile=profile.cov -service=travis-ci
