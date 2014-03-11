@@ -37,18 +37,18 @@ func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloRespons
 		}
 		defer resp.Body.Close()
 
-		log.Printf("got response: %v", resp)
+		log.Printf("got response: %v\n", resp)
 
 		var m Member
 		decoder := json.NewDecoder(resp.Body)
-		log.Println("decoder: %v", decoder)
+		log.Printf("decoder: %v\n", decoder)
 		err = decoder.Decode(&m)
 		if err != nil {
-			log.Printf("error decoding json: %v", err)
+			log.Printf("error decoding json: %v\n", err)
 			trc <- &TrelloResponse{error: err}
 			return
 		}
-		log.Println("model: %v", m)
+		log.Printf("model: %v\n", m)
 		trc <- &TrelloResponse{model: m}
 	}()
 
