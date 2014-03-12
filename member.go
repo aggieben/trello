@@ -20,25 +20,25 @@ func (m Member) MinimalFields() []ModelField {
 }
 
 // Get Member model of authenticated user
-func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloResponse {
+func (_ *Member) Me(_context interface{}, params *ModelParams) <-chan *TrelloResponse {
 	trc := make(chan *TrelloResponse)
-
+	context := _context.(*context)
 	go func() {
 		if context.token == "" {
-			trc <- &TrelloResponse{error: errors.New("Cannot request members/me without user token.")}
+			trc <- &TrelloResponse{Error: errors.New("Cannot request members/me without user token.")}
 		}
 
 		req := MakeGetRequest(context, "members/me", fmt.Sprintf("fields=%v", params.FieldsQueryParameter()))
 
 		resp, err := context.client.Do(req)
 		if err != nil {
-			trc <- &TrelloResponse{error: err}
+			trc <- &TrelloResponse{Error: err}
 			return
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
-			trc <- &TrelloResponse{error: errors.New(resp.Status)}
+			trc <- &TrelloResponse{Error: errors.New(resp.Status)}
 			return
 		}
 
@@ -47,11 +47,11 @@ func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloRespons
 		if err = decoder.Decode(&m); err == io.EOF {
 			trc <- &TrelloResponse{}
 		} else if err != nil {
-			trc <- &TrelloResponse{error: err}
+			trc <- &TrelloResponse{Error: err}
 			return
 		}
 
-		trc <- &TrelloResponse{model: m}
+		trc <- &TrelloResponse{Model: m}
 	}()
 
 	return trc

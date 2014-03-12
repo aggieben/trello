@@ -13,8 +13,9 @@ func Version() string {
 	return "0.1"
 }
 
-// Context is a type used to pass global, semi-const parameters to API
-// requests, like access tokens, application secret, current user, etc.
+// context is a type used to pass global, semi-const parameters to API
+// requests, like access tokens, application secret, current user, etc.  This
+// should be a black box to the user.
 type context struct {
 	version string
 	key     string
@@ -27,7 +28,7 @@ type context struct {
 // Trello is the main type that users of the SDK will interact with.  It
 // encapsulates an HTTP client and manages state.
 type Trello struct {
-	context *context
+	Context *context
 
 	Members Member
 }
@@ -48,7 +49,7 @@ func NewTrello(params TrelloParams) *Trello {
 	}
 
 	return &Trello{
-		context: &context{
+		Context: &context{
 			params.Version,
 			params.AppKey,
 			params.AppSecret,

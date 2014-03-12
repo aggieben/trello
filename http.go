@@ -6,10 +6,8 @@ import "runtime"
 import "fmt"
 import "log"
 
-const apiHost = "api.trello.com"
-
 func MakeGetRequest(context *context, path string, query string) *http.Request {
-	baseUrl := fmt.Sprintf("https://%s/1", apiHost)
+	baseUrl := fmt.Sprintf("https://api.trello.com")
 	if context.baseUrl != "" {
 		baseUrl = context.baseUrl
 	}
@@ -26,6 +24,6 @@ func MakeGetRequest(context *context, path string, query string) *http.Request {
 }
 
 type TrelloResponse struct {
-	model Model
-	error interface{}
+	Model Model
+	Error interface{}
 }
