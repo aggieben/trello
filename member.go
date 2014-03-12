@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 )
 
 type Member struct {
@@ -38,7 +39,8 @@ func (_ *Member) Me(_context interface{}, params *ModelParams) <-chan *TrelloRes
 		defer resp.Body.Close()
 
 		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
-			trc <- &TrelloResponse{Error: errors.New(resp.Status)}
+			errorBody, _ := ioutil.ReadAll(resp.Body)
+			trc <- &TrelloResponse{Error: errors.New(fmt.Sprintf("%s: %s", resp.Status, errorBody)}
 			return
 		}
 
