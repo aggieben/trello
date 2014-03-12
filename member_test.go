@@ -12,7 +12,10 @@ import (
 func TestMemberGetMeWithMinimalFields(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.URL.Path, "/1/members/me")
-		assert.Equal(t, r.URL.Query(), url.Values{"fields": []string{"fullName,username"}})
+		assert.Equal(t, r.URL.Query(), url.Values{
+			"fields": []string{"fullName,username"},
+			"key":    []string{"key"},
+			"token":  []string{"token"}})
 
 		fmt.Fprintln(w, `{"id":"4f11b44baf3eab192c009ff7","fullName":"Benjamin Collins","username":"aggieben"}"`)
 	}))
@@ -21,13 +24,13 @@ func TestMemberGetMeWithMinimalFields(t *testing.T) {
 	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", UserToken: "token", baseUrl: svr.URL})
 	assert.NotNil(t, trello)
 
-	rx := trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
+	rx := trello.Members.Me(trello.Context, &ModelParams{Fields: trello.Members.MinimalFields()})
 
 	resp := <-rx
-	assert.Nil(t, resp.error, "err: %v", resp.error)
-	assert.NotNil(t, resp.model)
+	assert.Nil(t, resp.Error, "err: %v", resp.Error)
+	assert.NotNil(t, resp.Model)
 
-	fmt.Printf("got model of type %T: %v\n", resp.model, resp.model)
+	fmt.Printf("got model of type %T: %v\n", resp.Model, resp.Model)
 }
 
 func TestMemberGetMeWithoutUserToken(t *testing.T) {
@@ -39,10 +42,10 @@ func TestMemberGetMeWithoutUserToken(t *testing.T) {
 	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", baseUrl: svr.URL})
 	assert.NotNil(t, trello)
 
-	rx := trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
+	rx := trello.Members.Me(trello.Context, &ModelParams{Fields: trello.Members.MinimalFields()})
 	resp := <-rx
 
-	err, ok := resp.error.(error)
+	err, ok := resp.Error.(error)
 	assert.True(t, ok, "error was not an error after all")
 	assert.Error(t, err, "without a token, Members.Me should return an error.")
 
@@ -56,15 +59,15 @@ func TestMemberGetMeWithHttp404(t *testing.T) {
 	defer svr.Close()
 
 	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", UserToken: "token", baseUrl: svr.URL})
-	rx := trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
+	rx := trello.Members.Me(trello.Context, &ModelParams{Fields: trello.Members.MinimalFields()})
 	resp := <-rx
 
-	assert.Nil(t, resp.model, "expecting no model in response")
-	err, ok := resp.error.(error)
+	assert.Nil(t, resp.Model, "expecting no model in response")
+	err, ok := resp.Error.(error)
 	assert.True(t, ok, "error was not an error after all")
 	assert.Error(t, err, "expecting http error response")
 
-	fmt.Printf("received error in response: %v\n", resp.error)
+	fmt.Printf("received error in response: %v\n", resp.Error)
 }
 
 func TestMemberGetMeWithJsonErrors(t *testing.T) {
@@ -78,12 +81,12 @@ func TestMemberGetMeWithJsonErrors(t *testing.T) {
 
 	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", UserToken: "token", baseUrl: svr.URL})
 	for i := 0; i < len(jsonResponses); i++ {
-		resp := <-trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
-		assert.Nil(t, resp.model, "expecting no model in response")
-		err, ok := resp.error.(error)
+		resp := <-trello.Members.Me(trello.Context, &ModelParams{Fields: trello.Members.MinimalFields()})
+		assert.Nil(t, resp.Model, "expecting no model in response")
+		err, ok := resp.Error.(error)
 		assert.True(t, ok, "error was not an error after all")
 		assert.Error(t, err, "expecting a json error response")
 
-		fmt.Printf("received error in response: %v\n", resp.error)
+		fmt.Printf("received error in response: %v\n", resp.Error)
 	}
 }

@@ -8,10 +8,10 @@ import (
 
 func TestNewTrelloHasContext(t *testing.T) {
 	trello := NewTrello(TrelloParams{})
-	assert.NotNil(t, trello.context)
+	assert.NotNil(t, trello.Context)
 }
 
 func TestNewTrelloHasClient(t *testing.T) {
 	trello := NewTrello(TrelloParams{})
-	assert.NotNil(t, trello.context.client)
+	assert.NotNil(t, trello.Context.client)
 }
