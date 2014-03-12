@@ -66,3 +66,24 @@ func TestMemberGetMeWithHttp404(t *testing.T) {
 
 	fmt.Printf("received error in response: %v\n", resp.error)
 }
+
+func TestMemberGetMeWithJsonErrors(t *testing.T) {
+	responseIndex := 0
+	jsonResponses := []string{`[1, "string",`, `[1, "string",,:]`, `[1, 2, 3]`}
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, jsonResponses[responseIndex])
+		responseIndex += 1
+	}))
+	defer svr.Close()
+
+	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", UserToken: "token", baseUrl: svr.URL})
+	for i := 0; i < len(jsonResponses); i++ {
+		resp := <-trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
+		assert.Nil(t, resp.model, "expecting no model in response")
+		err, ok := resp.error.(error)
+		assert.True(t, ok, "error was not an error after all")
+		assert.Error(t, err, "expecting a json error response")
+
+		fmt.Printf("received error in response: %v\n", resp.error)
+	}
+}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 )
 
 type Member struct {
@@ -43,11 +44,13 @@ func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloRespons
 
 		var m Member
 		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&m)
-		if err != nil {
+		if err = decoder.Decode(&m); err == io.EOF {
+			trc <- &TrelloResponse{}
+		} else if err != nil {
 			trc <- &TrelloResponse{error: err}
 			return
 		}
+
 		trc <- &TrelloResponse{model: m}
 	}()
 
