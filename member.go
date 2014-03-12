@@ -23,13 +23,13 @@ func (m Member) MinimalFields() []ModelField {
 func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloResponse {
 	trc := make(chan *TrelloResponse)
 
-	if context.token == "" {
-		trc <- &TrelloResponse{error: errors.New("Cannot request members/me without user token.")}
-	}
-
-	req := MakeGetRequest(context, "members/me", fmt.Sprintf("fields=%v", params.FieldsQueryParameter()))
-
 	go func() {
+		if context.token == "" {
+			trc <- &TrelloResponse{error: errors.New("Cannot request members/me without user token.")}
+		}
+
+		req := MakeGetRequest(context, "members/me", fmt.Sprintf("fields=%v", params.FieldsQueryParameter()))
+
 		resp, err := context.client.Do(req)
 		if err != nil {
 			trc <- &TrelloResponse{error: err}

@@ -29,3 +29,22 @@ func TestMemberGetMeWithMinimalFields(t *testing.T) {
 
 	fmt.Printf("got model of type %T: %v\n", resp.model, resp.model)
 }
+
+func TestMemberGetMeWithoutUserToken(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Fail(t, "error: request should never have been made.")
+	}))
+	defer svr.Close()
+
+	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", baseUrl: svr.URL})
+	assert.NotNil(t, trello)
+
+	rx := trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
+	resp := <-rx
+
+	err, ok := resp.error.(error)
+	assert.True(t, ok, "error was not an error after all")
+	assert.Error(t, err, "without a token, Members.Me should return an error.")
+
+	fmt.Printf("successfully received error: %v\n", err)
+}
