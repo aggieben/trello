@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 )
 
 type Member struct {
@@ -37,18 +36,18 @@ func (_ *Member) Me(context *context, params *ModelParams) <-chan *TrelloRespons
 		}
 		defer resp.Body.Close()
 
-		log.Printf("got response: %v\n", resp)
+		if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+			trc <- &TrelloResponse{error: errors.New(resp.Status)}
+			return
+		}
 
 		var m Member
 		decoder := json.NewDecoder(resp.Body)
-		log.Printf("decoder: %v\n", decoder)
 		err = decoder.Decode(&m)
 		if err != nil {
-			log.Printf("error decoding json: %v\n", err)
 			trc <- &TrelloResponse{error: err}
 			return
 		}
-		log.Printf("model: %v\n", m)
 		trc <- &TrelloResponse{model: m}
 	}()
 

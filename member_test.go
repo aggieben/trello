@@ -48,3 +48,21 @@ func TestMemberGetMeWithoutUserToken(t *testing.T) {
 
 	fmt.Printf("successfully received error: %v\n", err)
 }
+
+func TestMemberGetMeWithHttp404(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer svr.Close()
+
+	trello := NewTrello(TrelloParams{Version: "1", AppKey: "key", UserToken: "token", baseUrl: svr.URL})
+	rx := trello.Members.Me(trello.context, &ModelParams{Fields: trello.Members.MinimalFields()})
+	resp := <-rx
+
+	assert.Nil(t, resp.model, "expecting no model in response")
+	err, ok := resp.error.(error)
+	assert.True(t, ok, "error was not an error after all")
+	assert.Error(t, err, "expecting http error response")
+
+	fmt.Printf("received error in response: %v\n", resp.error)
+}
