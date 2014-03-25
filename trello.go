@@ -6,7 +6,14 @@
 package trello
 
 import (
+	"code.google.com/p/goauth2/oauth"
 	"net/http"
+)
+
+const (
+	OAuthRequestURL   = "https://trello.com/1/OAuthGetRequestToken"
+	OAuthAccessURL    = "https://trello.com/1/OAuthGetAccessToken"
+	OAuthAuthorizeURL = "https://trello.com/1/OAuthAuthorizeToken"
 )
 
 func Version() string {
