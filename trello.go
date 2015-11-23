@@ -6,7 +6,6 @@
 package trello
 
 import (
-	"code.google.com/p/goauth2/oauth"
 	"net/http"
 )
 
